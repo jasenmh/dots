@@ -5,22 +5,28 @@
     height: 200px;
     background: beige;
   }
+  .divholder {
+    float: left;
+  }
   .ledpanel {
-    height: 112px; width: 112px;
+    height: 144px; width: 144px;
     background: black;
     position: relative;
   }
   .dot {
-    height: 12px; width: 12px;
-    border-radius: 6px; /* rounds corners */
+    height: 16px; width: 16px;
+    border-radius: 8px; /* rounds corners */
     background: blue;
     position: absolute;
   }
   .dotlit {
-    height: 12px; width: 12px;
-    border-radius: 6px; /* rounds corners */
+    height: 16px; width: 16px;
+    border-radius: 8px; /* rounds corners */
     background: red;
     position: absolute;
+  }
+  .buttonholder {
+    position: relative;
   }
 </style>
 <script>
@@ -34,6 +40,36 @@ function clearLeds()
     }
 }
 
+function writeAnimOut()
+{
+    var animOut = document.getElementsByClassName("animout")[0];
+
+    if(animOut.value != "")
+        animOut.value = "";
+
+    for(var i = 0; i < 8; i = i + 1)
+    {
+        var line = "B";
+
+        for(var j = 0; j < 8; j = j + 1)
+        {
+            if(leds[j * 8 + i].className == "dot")
+                line = line + "0";
+            else
+                line = line + "1";
+        }
+
+       line = line + ",\n";
+       animOut.value += line;
+    }
+    animOut.value += "25,";
+}
+
+function clearAnimOut()
+{
+    document.getElementsByClassName("animout")[0].value = "";
+}
+
 window.onload = function setupWindow()
 {
     var theDiv = document.getElementsByClassName("ledpanel")[0];
@@ -45,8 +81,8 @@ window.onload = function setupWindow()
             var dot = document.createElement("div");
             leds[leds.length] = dot;
             dot.className = "dot";
-            dot.style.left = (i * 14 + 1) + "px";
-            dot.style.top = (j * 14 + 1) + "px";
+            dot.style.left = (i * 18 + 1) + "px";
+            dot.style.top = (j * 18 + 1) + "px";
             dot.addEventListener("click", function(event) {
                 if(this.className == "dot")
                     this.className = "dotlit";
@@ -59,7 +95,19 @@ window.onload = function setupWindow()
 </script>
 </head>
 <body>
-<div class="ledpanel"></div>
-<button type="button" onclick="clearLeds();">Reset LEDs</button>
+<table>
+<tr>
+<td><div class="ledpanel"></div></td>
+<td><textarea class="animout" rows="9" cols="10"></textarea></td>
+</tr>
+<tr>
+<td><button type="button" onclick="clearLeds();">Reset LEDs</button></td>
+<td><button type="button" onclick="writeAnimOut();">Write Anim</button></td>
+</tr>
+<tr>
+<td>&nbsp</td>
+<td><button type="button" onclick="clearAnimOut();">Clear Anim</button></td>
+</tr>
+</table>
 </body>
 </html>
