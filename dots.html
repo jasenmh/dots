@@ -1,0 +1,65 @@
+<html>
+<head>
+<style>
+  body {
+    height: 200px;
+    background: beige;
+  }
+  .ledpanel {
+    height: 112px; width: 112px;
+    background: black;
+    position: relative;
+  }
+  .dot {
+    height: 12px; width: 12px;
+    border-radius: 6px; /* rounds corners */
+    background: blue;
+    position: absolute;
+  }
+  .dotlit {
+    height: 12px; width: 12px;
+    border-radius: 6px; /* rounds corners */
+    background: red;
+    position: absolute;
+  }
+</style>
+<script>
+var leds = [];
+
+function clearLeds()
+{
+    for(var i = 0; i < leds.length; i = i + 1)
+    {
+        leds[i].className = "dot";
+    }
+}
+
+window.onload = function setupWindow()
+{
+    var theDiv = document.getElementsByClassName("ledpanel")[0];
+
+    for(var i = 0; i < 8; i = i + 1)
+    {
+        for(var j = 0; j < 8; j = j + 1)
+        {
+            var dot = document.createElement("div");
+            leds[leds.length] = dot;
+            dot.className = "dot";
+            dot.style.left = (i * 14 + 1) + "px";
+            dot.style.top = (j * 14 + 1) + "px";
+            dot.addEventListener("click", function(event) {
+                if(this.className == "dot")
+                    this.className = "dotlit";
+                else
+                    this.className = "dot";});
+            theDiv.appendChild(dot);
+        }
+    }
+}
+</script>
+</head>
+<body>
+<div class="ledpanel"></div>
+<button type="button" onclick="clearLeds();">Reset LEDs</button>
+</body>
+</html>
