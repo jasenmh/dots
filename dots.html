@@ -38,6 +38,8 @@
 </style>
 <script>
 var leds = [];
+var lastAnim = [];
+var animSequence = [];
 
 function clearLeds()
 {
@@ -217,6 +219,7 @@ function loadAnim()
 
     animOut.value = "";
     animOut.value += loadedAnim;
+    lastAnim = loadedAnim.split(",");
     loadAnimIntoLeds(loadedAnim);
 }
 
@@ -237,6 +240,45 @@ function deleteAnim()
     }
 
     alert("Anim \"" + anim + "\" does not exist.");
+}
+
+function animateSequence()
+{
+    var animSeq = document.getElementsByName("animseq")[0];
+    var saveName = document.getElementsByName("savename")[0];
+    var seq = animSeq.value.split(" ");
+
+    if(seq.length <= 0)
+    {
+        alert("Unable to animate an empty sequence.");
+        return;
+    }
+
+    var nextAnim = seq.shift();
+    animSequence = seq;
+    saveName.value = nextAnim;
+    loadAnim();
+    waitTime = lastAnim[8] * 10;
+
+    setTimeout(nextAnimSequence, waitTime);
+}
+
+function nextAnimSequence()
+{
+    var saveName = document.getElementsByName("savename")[0];
+
+    if(animSequence.length <= 0)
+    {
+        // alert("Animation complete.");
+        return;
+    }
+
+    var nextAnim = animSequence.shift();
+    saveName.value = nextAnim;
+    loadAnim();
+    waitTime = lastAnim[8] * 10;
+
+    setTimeout(nextAnimSequence, waitTime);
 }
 
 window.onload = function setupWindow()
@@ -299,6 +341,11 @@ Phillip Burgess at
     <td>&nbsp</td>
     <td>&nbsp</td>
     <td><button type="button" onclick="deleteAnim();">Delete Frame</button></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="animseq"></td>
+    <td><button type="button" onclick="animateSequence();">Animate Sequence</button></td>
+    <td>&nbsp</td>
   </tr>
 </table>
 <p>
