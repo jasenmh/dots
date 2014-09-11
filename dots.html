@@ -85,6 +85,15 @@ function loadAnimIntoLeds(anim)
     }
 }
 
+function displayErrorAnim()
+{
+    clearLeds();
+    ledError(3, 3);
+    ledError(4, 3);
+    ledError(3, 4);
+    ledError(4, 4);
+}
+
 function writeAnimOut()
 {
     var animOut = document.getElementsByClassName("animout")[0];
@@ -245,7 +254,6 @@ function deleteAnim()
 function animateSequence()
 {
     var animSeq = document.getElementsByName("animseq")[0];
-    var saveName = document.getElementsByName("savename")[0];
     var seq = animSeq.value.split(" ");
 
     if(seq.length <= 0)
@@ -254,13 +262,8 @@ function animateSequence()
         return;
     }
 
-    var nextAnim = seq.shift();
     animSequence = seq;
-    saveName.value = nextAnim;
-    loadAnim();
-    waitTime = lastAnim[8] * 10;
-
-    setTimeout(nextAnimSequence, waitTime);
+    nextAnimSequence();
 }
 
 function nextAnimSequence()
@@ -274,9 +277,18 @@ function nextAnimSequence()
     }
 
     var nextAnim = animSequence.shift();
-    saveName.value = nextAnim;
-    loadAnim();
-    waitTime = lastAnim[8] * 10;
+    var checkAnim = localStorage.getItem("dots-" + nextAnim);
+    if(checkAnim == null)
+    {
+        displayErrorAnim();
+        waitTime = 1000;
+    }
+    else
+    {
+        saveName.value = nextAnim;
+        loadAnim();
+        waitTime = lastAnim[8] * 10;
+    }
 
     setTimeout(nextAnimSequence, waitTime);
 }
@@ -343,6 +355,11 @@ Phillip Burgess at
     <td><button type="button" onclick="deleteAnim();">Delete Frame</button></td>
   </tr>
   <tr>
+    <td><label>Frame Sequence</label></td>
+    <td>&nbsp</td>
+    <td>&nbsp</td>
+  </tr>
+  <tr>
     <td><input type="text" name="animseq"></td>
     <td><button type="button" onclick="animateSequence();">Animate Sequence</button></td>
     <td>&nbsp</td>
@@ -361,6 +378,7 @@ to the anim array in the anim.h file.</li>
 clicking the 'Load Frame' button.</li>
 <li>You can delete a frame by selecting it from the drop-down menu and clicking 
 the 'Delete Frame' button.</li>
+<li>To see a sequence of frames animated as they would be on a pendant, enter the names of the frames to display in the 'Frame Sequence' field seperated by spaces and click the 'Animate Sequence' button.</li>
 </ol>
 <br>
 Note: All frames have a time of <b>25</b> (a quarter of a second). You may
