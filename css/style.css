@@ -1,0 +1,33 @@
+body {
+    height: 200px;
+    background: beige;
+}
+.divholder {
+    float: left;
+}
+.ledpanel {
+    height: 144px; width: 144px;
+    background: black;
+    position: relative;
+}
+.dot {
+    height: 16px; width: 16px;
+    border-radius: 8px; /* rounds corners */
+    background: blue;
+    position: absolute;
+}
+.dotlit {
+    height: 16px; width: 16px;
+    border-radius: 8px; /* rounds corners */
+    background: red;
+    position: absolute;
+}
+.doterror {
+    height: 16px; width: 16px;
+    border-radius: 8px;
+    background: yellow;
+    position: absolute;
+}
+.buttonholder {
+    position: relative;
+}

@@ -1,322 +1,35 @@
 <html>
-<head>
-<title>Trinket/Gemma Pendant Animator</title>
-<style>
-  body {
-    height: 200px;
-    background: beige;
-  }
-  .divholder {
-    float: left;
-  }
-  .ledpanel {
-    height: 144px; width: 144px;
-    background: black;
-    position: relative;
-  }
-  .dot {
-    height: 16px; width: 16px;
-    border-radius: 8px; /* rounds corners */
-    background: blue;
-    position: absolute;
-  }
-  .dotlit {
-    height: 16px; width: 16px;
-    border-radius: 8px; /* rounds corners */
-    background: red;
-    position: absolute;
-  }
-  .doterror {
-    height: 16px; width: 16px;
-    border-radius: 8px;
-    background: yellow;
-    position: absolute;
-  }
-  .buttonholder {
-    position: relative;
-  }
-</style>
-<script>
-var leds = [];
-
-function clearLeds()
-{
-    for(var i = 0; i < leds.length; i = i + 1)
-    {
-        leds[i].className = "dot";
-    }
-}
-
-function ledOn(x, y)
-{
-    leds[8 * x + y].className = "dotlit";
-}
-
-function ledOff(x, y)
-{
-    leds[8 * x + y].className = "dot";
-}
-
-function ledError(x, y)
-{
-    leds[8 * x + y].className = "doterror";
-}
-
-function loadAnimIntoLeds(anim)
-{
-    var pos;
-
-    clearLeds();
-
-    for(var y = 0; y < 8; ++y)
-    {
-        for(var x = 0; x < 8; ++x)
-        {
-            pos = 8 * y + x;
-            pos += y + 1;   // account for leading 'B's
-            pos += y * 2;   // account for trailing ',\n's
-            if(anim[pos] == 1)
-                ledOn(x, y);
-            else if(anim[pos] != 0)
-                ledError(x, y);
-        }
-    }
-}
-
-function writeAnimOut()
-{
-    var animOut = document.getElementsByClassName("animout")[0];
-
-    if(animOut.value != "")
-        animOut.value = "";
-
-    for(var i = 0; i < 8; i = i + 1)
-    {
-        var line = "B";
-
-        for(var j = 0; j < 8; j = j + 1)
-        {
-            if(leds[j * 8 + i].className == "dot")
-                line = line + "0";
-            else
-                line = line + "1";
-        }
-
-       line = line + ",\n";
-       animOut.value += line;
-    }
-    animOut.value += "25,";
-}
-
-function clearAnimOut()
-{
-    document.getElementsByClassName("animout")[0].value = "";
-}
-
-function sortAnimList()
-{
-    var savedAnims = document.getElementsByClassName("savedanims")[0];
-    var tmpAry = new Array();
-
-    for(var i = 0; i < savedAnims.options.length; ++i)
-    {
-        tmpAry[i] = new Array();
-        tmpAry[i][0] = savedAnims.options[i].text;
-        tmpAry[i][1] = savedAnims.options[i].value;
-    }
-
-    tmpAry.sort();
-
-    while(savedAnims.options.length > 0)
-        savedAnims.options[0] = null;
-
-    for(var i = 0; i < tmpAry.length; ++i)
-    {
-        var op = new Option(tmpAry[i][0], tmpAry[i][1]);
-        savedAnims.options[i] = op;
-    }
-}
-
-function initAnims()
-{
-    var keyStr;
-    
-    for(var i = 0; i < localStorage.length; i += 1)
-    {
-        keyStr = localStorage.key(i);
-        if(keyStr.substring(0, 5) == "dots-")
-        {
-            addAnimToList(keyStr.substring(5,99));
-        }
-    }
-
-    sortAnimList();
-}
-
-function addAnimToList(anim)
-{
-    var savedAnims = document.getElementsByClassName("savedanims")[0];
-
-    for(var i = 0; i < savedAnims.length; i++)
-    {
-        if(savedAnims.options[i].value == anim)
-        {
-            savedAnims.remove(i);
-            break;
-        }
-    }
-
-    var option = document.createElement("option");
-    option.value = anim;
-    option.text = anim;
-
-    savedAnims.add(option);
-
-    sortAnimList();
-}
-
-function updateSaveName()
-{
-    var savedAnims = document.getElementsByClassName("savedanims")[0];
-    var saveName = document.getElementsByName("savename")[0];
-
-    saveName.value = savedAnims.value;
-}
-
-function saveAnim()
-{
-    var animOut = document.getElementsByClassName("animout")[0];
-    var savedAnims = document.getElementsByClassName("savedanims")[0];
-    var saveName = document.getElementsByName("savename")[0];
-
-    if(animOut.value == "")
-        return alert("Can not save an empty anim. Write Anim first.");
-
-    if(saveName.value == "")
-    {
-        saveName.focus();
-        return alert("Can not save an anim without a name.");
-    }
-
-    hasSave = localStorage.getItem("dots-" + saveName.value);
-    if(hasSave != null)
-        localStorage.removeItem("dots-" + saveName.value);
-
-    localStorage.setItem("dots-" + saveName.value, animOut.value);
-    addAnimToList(saveName.value);
-}
-
-function loadAnim()
-{
-    var animOut = document.getElementsByClassName("animout")[0];
-    var saveName = document.getElementsByName("savename")[0];
-
-    var loadedAnim = localStorage.getItem("dots-" + saveName.value);
-    if(loadedAnim == null)
-        return alert("Unable to load anim \"" + saveName.value + "\".");
-
-    animOut.value = "";
-    animOut.value += loadedAnim;
-    loadAnimIntoLeds(loadedAnim);
-}
-
-function deleteAnim()
-{
-    var savedAnims = document.getElementsByClassName("savedanims")[0];
-    var saveName = document.getElementsByName("savename")[0];
-    var anim = saveName.value;
-
-    for(var i = 0; i < savedAnims.length; i++)
-    {
-        if(savedAnims.options[i].value == anim)
-        {
-            localStorage.removeItem("dots-" + anim);
-            savedAnims.remove(i);
-            return;
-        }
-    }
-
-    alert("Anim \"" + anim + "\" does not exist.");
-}
-
-window.onload = function setupWindow()
-{
-    var theDiv = document.getElementsByClassName("ledpanel")[0];
-    var savedAnims = document.getElementsByClassName("savedanims")[0];
-
-    for(var i = 0; i < 8; i = i + 1)
-    {
-        for(var j = 0; j < 8; j = j + 1)
-        {
-            var dot = document.createElement("div");
-            leds[leds.length] = dot;
-            dot.className = "dot";
-            dot.style.left = (i * 18 + 1) + "px";
-            dot.style.top = (j * 18 + 1) + "px";
-            dot.addEventListener("click", function(event) {
-                if(this.className == "dot")
-                    this.className = "dotlit";
-                else
-                    this.className = "dot";});
-            theDiv.appendChild(dot);
-        }
-    }
-
-    var blank = document.createElement("option");
-    blank.text = "";
-    blank.value = "";
-    savedAnims.add(blank);
-    initAnims();
-}
-</script>
-</head>
-<body>
-<div><h2>Pendant Animator</h2><br>
-To be used to create animation frames for the pendant project created by
-Phillip Burgess at 
-<a href="https://learn.adafruit.com/trinket-slash-gemma-space-invader-pendant/overview">adafruit</a>.
-</p>
-</div>
-<table>
-  <tr>
-    <td><div class="ledpanel"></div></td>
-    <td><textarea class="animout" cols="10" rows="9"></textarea></td>
-    <td><select class="savedanims" onchange="updateSaveName();"></select></td>
-  </tr>
-  <tr>
-    <td><button type="button" onclick="clearLeds();">Reset LEDs</button></td>
-    <td><button type="button" onclick="writeAnimOut();">Generate Code</button></td>
-    <td><button type="button" onclick="loadAnim();">Load Frame</button></td>
-    <td><label>Frame Name</label></td>
-  </tr>
-  <tr>
-    <td>&nbsp</td>
-    <td><button type="button" onclick="clearAnimOut();">Clear Code</button></td>
-    <td><button type="button" onclick="saveAnim();">Save Frame</button></td>
-    <td><input type="text" name="savename"></td>
-  </tr>
-  <tr>
-    <td>&nbsp</td>
-    <td>&nbsp</td>
-    <td><button type="button" onclick="deleteAnim();">Delete Frame</button></td>
-  </tr>
-</table>
-<p>
-<div>
-<h2>Instructions</h2>
-<ol>
-<li>Click on the LEDs in the array to create an animation frame.</li>
-<li>Click on the 'Generate Code' button to get the array lines you will add 
-to the anim array in the anim.h file.</li>
-<li>You can save a frame by filling in the Frame Name field ad clicking the 
-'Save Frame' button.</li>
-<li>You can load a saved frame by selecting it from the drop-down menu and 
-clicking the 'Load Frame' button.</li>
-<li>You can delete a frame by selecting it from the drop-down menu and clicking 
-the 'Delete Frame' button.</li>
-</ol>
-<br>
-Note: All frames have a time of <b>25</b> (a quarter of a second). You may
-want to adjust this to achieve different animation effects.
-</body>
+    <head>
+        <title>Trinket/Gemma Pendant Animator</title>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <script src="js/dots.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <div>
+            <h2>Pendant Animator</h2><br>
+            To be used to create animation frames for the pendant project created by
+            Phillip Burgess at
+            <a href="https://learn.adafruit.com/trinket-slash-gemma-space-invader-pendant/overview">adafruit</a>.
+            <p>
+        </div>
+        <div class="dots"></div>
+        <p>
+        <div>
+            <h2>Instructions</h2>
+            <ol>
+                <li>Click on the LEDs in the array to create an animation frame.</li>
+                <li>Click on the 'Generate Code' button to get the array lines you will add
+                to the anim array in the anim.h file.</li>
+                <li>You can save a frame by filling in the Frame Name field ad clicking the
+                'Save Frame' button.</li>
+                <li>You can load a saved frame by selecting it from the drop-down menu and
+                clicking the 'Load Frame' button.</li>
+                <li>You can delete a frame by selecting it from the drop-down menu and clicking
+                the 'Delete Frame' button.</li>
+            </ol>
+            <br>
+            Note: All frames have a time of <b>25</b> (a quarter of a second). You may
+            want to adjust this to achieve different animation effects.
+        </div>
+    </body>
 </html>
